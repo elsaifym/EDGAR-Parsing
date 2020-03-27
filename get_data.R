@@ -2,7 +2,7 @@
 ### get_data.R                          ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/12/20              ###
-### Date modified: 03/12/20             ###
+### Date modified: 03/26/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -66,7 +66,7 @@ get.data <- function(call, connection = wrds, ...) {
 
 # get start, end dates
 start_ <- '1990-01-01'
-end_ <- '2020-01-01'
+end_ <- Sys.Date()
 
 add.dates <- function(x, datevar, type = c('both', 'start', 'end'), start = start_, end = end_, and) {
     # match type arg
@@ -164,7 +164,7 @@ crspq <- crsp[, .SD[.N, ], by = list(permno, yearqtr)]
 crspq[, `:=`(prc = abs(prc), split = cfacpr != shift(cfacpr, type = 'lag', 1)), by = permno]
 
 # only keep ncusip, yearqtr, prc, shrout, split
-crspq <- crspq[, c('ncusip', 'yearqtr', 'prc', 'shrout', 'split')]
+crspq <- crspq[, c('permno', 'ncusip', 'yearqtr', 'prc', 'shrout', 'split')]
 
 ##########
 
