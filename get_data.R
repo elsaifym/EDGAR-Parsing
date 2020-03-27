@@ -2,7 +2,7 @@
 ### get_data.R                          ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/12/20              ###
-### Date modified: 03/26/20             ###
+### Date modified: 03/27/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -46,7 +46,7 @@ establish.connection <- function(user, password, host = 'wrds-pgdata.wharton.upe
 
     return(wrds)
 }
-wrds <- establish.connection('elsaifym', 'Mory!1995')
+wrds <- establish.connection()
 
 # function to get data from query
 get.data <- function(call, connection = wrds, ...) {
