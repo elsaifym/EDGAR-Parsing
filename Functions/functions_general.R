@@ -121,13 +121,29 @@ regmatches.multiple <- function(pattern, x, n, min.digits = 6, max.digits = 9, .
     return(list(match = match, start = start, end = end))
 }
 
+# function to substitute all
+gsub.all <- function(pattern, replacement, x, ...) {
+    # if length 0, make no changes
+    if(length(pattern) == 0) {
+        return(x)
+    }
+
+    # else, iterate over pattern
+    for(i in 1:length(pattern)) {
+        x <- gsub(pattern[i], replacement[i], x)
+    }
+
+    # return x
+    return(x)
+}
+
 ##########
 
 ##### FUNCTIONS TO GATHER ADDRESSES OF FILINGS #####
 
 # function to gather addresses in a specific file
 get.one.address <- function(file.name, counter, total, start.time, folder = 'Master Files/All_13F', 
-                            min.date = as.Date('2013-09-30'), max.date = as.Date(Sys.time())) {
+                            min.date = as.Date('1800-01-01'), max.date = Sys.Date()) {
     
     # load file
     file <- fread(paste(folder, file.name, sep = '/'), col.names = c('cik', 'cikname', 'form', 'fdate', 'address'))
@@ -139,7 +155,9 @@ get.one.address <- function(file.name, counter, total, start.time, folder = 'Mas
     file <- file[fdate >= min.date & fdate <= max.date, ]
 
     # print progress if counter and total supplied
-    progress(counter, total, start.time, message = 'Extracted 13F data from')
+    if(!missing(counter) & !missing(total)) {
+        progress(counter, total, start.time, message = 'Extracted 13F data from')
+    }
     
     # return
     return(file)

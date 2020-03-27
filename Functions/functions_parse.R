@@ -208,22 +208,6 @@ parse.tab <- function(table, cusip.universe, crsp.universe, ...) {
     return(data)
 }
 
-# function to substitute all
-gsub.all <- function(pattern, replacement, x, ...) {
-    # if length 0, make no changes
-    if(length(pattern) == 0) {
-        return(x)
-    }
-
-    # else, iterate over pattern
-    for(i in 1:length(pattern)) {
-        x <- gsub(pattern[i], replacement[i], x)
-    }
-
-    # return x
-    return(x)
-}
-
 # function to parse csv tables
 parse.csv <- function(table, cusip.universe, crsp.universe, ...) {
     # remove all commas between quotes
