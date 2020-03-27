@@ -2,7 +2,7 @@
 ### get_master_files.R                  ###
 ### Author: Morad Elsaify               ###
 ### Date created: 02/06/20              ###
-### Date modified: 03/21/20             ###
+### Date modified: 03/26/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -20,7 +20,7 @@ use Mozilla::CA;
 use Cwd;
 
 # change working directory
-chdir('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Data/Master Files') or die "cannot change: $!\n";
+chdir('/hps/group/fuqua/mie4/EDGAR Parsing/Data/Master Files') or die "cannot change: $!\n";
 
 # misc setup
 my $ua = LWP::UserAgent->new; 

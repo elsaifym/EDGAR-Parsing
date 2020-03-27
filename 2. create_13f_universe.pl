@@ -1,8 +1,8 @@
 ###########################################
-### create_13f_universe.R               ###
+### 2. create_13f_universe.pl           ###
 ### Author: Morad Elsaify               ###
 ### Date created: 01/29/20              ###
-### Date modified: 03/21/20             ###
+### Date modified: 03/26/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -13,7 +13,7 @@
 ###########################################################################################################
 
 use Cwd;
-chdir('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Data/Master Files') or die "cannot change: $!\n";
+chdir('/hpc/group/fuqua/mie4/EDGAR Parsing/Data/Master Files') or die "cannot change: $!\n";
 
 # initialize directories
 $commandunix = "mkdir " . 'All_13F' . "\n"; 

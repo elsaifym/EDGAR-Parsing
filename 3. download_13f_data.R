@@ -1,8 +1,8 @@
 ###########################################
-### download_13f_data.R                 ###
+### 3. download_13f_data.R              ###
 ### Author: Morad Elsaify               ###
 ### Date created: 02/04/19              ###
-### Date modified: 03/22/19             ###
+### Date modified: 03/26/19             ###
 ###########################################
 
 ###########################################################################################################
@@ -10,7 +10,7 @@
 ### filings are later parsed in extract_13f_data.R.                                                     ###
 ###########################################################################################################
 
-# source('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Code/3. download_13f_data.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/EDGAR Parsing/Code/3. download_13f_data.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -29,11 +29,11 @@ library(XML)
 library(parallel)
 
 # source functions
-source('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Code/Functions/functions_general.R')
-source('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Code/Functions/functions_download.R')
+source('/hpc/group/fuqua/mie4/EDGAR Parsing/Code/Functions/functions_general.R')
+source('/hpc/group/fuqua/mie4/EDGAR Parsing/Code/Functions/functions_download.R')
 
 # set directory
-setwd('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Data')
+setwd('/hpc/group/fuqua/mie4/EDGAR Parsing/Data')
 
 ##### DOWNLOAD ALL 13F REPORTS #####
 
