@@ -2,7 +2,7 @@
 ### get_cusip_universe.R                ###
 ### Author: Morad Elsaify               ###
 ### Date created: 02/27/20              ###
-### Date modified: 03/21/20             ###
+### Date modified: 03/27/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -11,7 +11,7 @@
 ### The pdfs are located at https://www.sec.gov/divisions/investment/13flists.htm.                      ###
 ###########################################################################################################
 
-# source('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Code/get_cusip_universe.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/edgar_parsing/code/get_cusip_universe.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -31,10 +31,10 @@ library(tesseract)
 library(parallel)
 
 # source functions
-source('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Code/Functions/functions_cusip_universe.R')
+source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_cusip_universe.R')
 
 # set directory
-setwd('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Data')
+setwd('/hpc/group/fuqua/mie4/edgar_parsing/data')
 
 # load crsp
 crspq <- fread('crspq.csv')
@@ -90,9 +90,9 @@ archive <- mclapply(archive, clean.tables.archive, mc.cores = detectCores())
 combined <- c(archive, post)
 
 # now, save combined
-load(archive, file = 'CUSIP Universe/cusip_universe_raw_pre2004.Rdata')
-load(post, file = 'CUSIP Universe/cusip_universe_raw_post2004.Rdata')
-load(combined, file = 'CUSIP Universe/cusip_universe_raw.Rdata')
+load(archive, file = 'cusip_universe/cusip_universe_raw_pre2004.Rdata')
+load(post, file = 'cusip_universe/cusip_universe_raw_post2004.Rdata')
+load(combined, file = 'cusip_universe/cusip_universe_raw.Rdata')
 
 # remove all cusips less than 9 digits
 combined <- lapply(combined, function(x) x[nchar(cusipno) == 9, ])
@@ -155,14 +155,14 @@ for(i in 1:length(combined)) {
 }
 
 # now, save combined
-save(combined, file = 'CUSIP Universe/cusip_universe.Rdata')
+save(combined, file = 'cusip_universe/cusip_universe.Rdata')
 
 # finally, just save cusip6 vector, and cusip6 in crsp
 cusip6_universe <- lapply(combined, function(x) unique(x$cusip6))
 cusip6_crsp_universe <- lapply(combined, function(x) unique(x[in_crsp == TRUE, ]$cusip6))
 
 # finally, save cusip6_universe
-save(cusip6_universe, file = 'CUSIP Universe/cusip6_universe.Rdata')
-save(cusip6_crsp_universe, file = 'CUSIP Universe/cusip6_crsp_universe.Rdata')
+save(cusip6_universe, file = 'cusip_universe/cusip6_universe.Rdata')
+save(cusip6_crsp_universe, file = 'cusip_universe/cusip6_crsp_universe.Rdata')
 
 ##########
