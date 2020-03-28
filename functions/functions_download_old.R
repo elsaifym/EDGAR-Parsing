@@ -43,7 +43,7 @@ download.all.13f <- function(table, start, end, min.date = as.Date('2013-09-30')
 
     # subset based on min.date, max.date
     if(!missing(min.date)) table <- table[fdate >= min.date, ]
-    if(!missing(max.date)) table <- table[fdate >= max.date, ]
+    if(!missing(max.date)) table <- table[fdate <= max.date, ]
 
     # get start, end if missing
     if(missing(start)) start <- 1

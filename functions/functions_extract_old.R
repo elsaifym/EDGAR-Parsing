@@ -180,5 +180,4 @@ extract.all.13f <- function(addresses, min.date, max.date, num.cores = detectCor
     return(results)
 }
 
-
 ##########
