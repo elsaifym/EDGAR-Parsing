@@ -17,4 +17,4 @@ mkdri 'rout'
 module load R/3.6.0
 
 # run R command, store out file
-R CMD BATCH --no-restore --no-save code/3_process_one_cik.R rout/rout_$SLURM_ARRAY_TASK_ID.Rout
+R CMD BATCH --no-restore --no-save code/process_one_cik.R rout/rout_$SLURM_ARRAY_TASK_ID.Rout

@@ -7,7 +7,8 @@
 
 ###########################################################################################################
 ### This file executes all functions necessary to download, extract, and parse all 13F filings for a    ###
-### given CIK. This is used along with functions_parallel.R to batch the job.                           ###
+### given CIK. This is used along with a host of functions to batch the job using SLURM (see            ###
+### submit_job.sh for batch job).                                                                       ###
 ###########################################################################################################
 
 # source('/hpc/group/fuqua/mie4/edgar_parsing/code/3_process_one_cik.R', echo = TRUE)
