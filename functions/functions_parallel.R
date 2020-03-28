@@ -2,7 +2,7 @@
 ### functions_parallel.R                ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/26/20              ###
-### Date modified: 03/26/20             ###
+### Date modified: 03/27/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -11,7 +11,7 @@
 ### functions_extract.R, and functions_parse.R.                                                         ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/EDGAR Parsing/Code/Functions/functions_parallel.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_parallel.R', echo = TRUE)
 
 ##### FUNCTIONS TO HANDLE ERRORS #####
 
@@ -113,11 +113,12 @@ gsub.all <- function(pattern, replacement, x) {
 ##### FUNCTIONS TO GATHER ADDRESSES OF FILINGS #####
 
 # function to gather addresses in a specific file
-get.one.address <- function(file.name, folder = 'Master Files/All_13F', 
+get.one.address <- function(file.name, folder = 'master_files/all_13f', 
                             min.date = as.Date('1800-01-01'), max.date = Sys.Date()) {
     
     # load file
-    file <- fread(paste(folder, file.name, sep = '/'), col.names = c('cik', 'cikname', 'form', 'fdate', 'address'))
+    file <- fread(paste(folder, file.name, sep = '/'), header = FALSE, 
+                  col.names = c('cik', 'cikname', 'form', 'fdate', 'address'), sep = ',')
 
     # convert date to date type
     file$fdate <- as.Date(file$fdate)
@@ -138,7 +139,7 @@ get.one.address <- function(file.name, folder = 'Master Files/All_13F',
 
 # function to download 13Fs for a single CIK
 download.one.cik <- function(table, base.url = 'https://www.sec.gov/Archives/edgar/data', 
-                             output.folder, overwrite = FALSE) {
+                             output.folder, overwrite = FALSE, sleep = 5) {
 
     # first, create main folder
     folder <- paste(output.folder, unique(table$cik), sep = '/')
@@ -154,11 +155,15 @@ download.one.cik <- function(table, base.url = 'https://www.sec.gov/Archives/edg
     if(length(files.to.download) != 0) {
         # download all files
         for(i in 1:length(files.to.download)) {
+
+            # pause for a random number of seconds between 1 and sleep to prevent overloading edgar
+            if(sleep >= 1) Sys.sleep(sample(1:sleep, 1))
+
             # get file
             txt <- readLines(paste(base.url, files.to.download[i], sep = '/'))
 
             # save
-            writeLines(txt, paste(output.folder, table$address, sep = '/')[i])
+            writeLines(txt, paste(output.folder, files.to.download[i], sep = '/'))
         }        
     }
 }
@@ -236,7 +241,7 @@ get.biographical <- function(txt, row) {
 }
 
 # function to extract and detect type of information table
-detect.infotable <- function(txt, rdate, cusips) {
+detect.infotable <- function(txt, rdate, cusips, start.rdate = 19990000) {
 
     # set table to NULL, type to none
     table <- NULL
@@ -253,7 +258,7 @@ detect.infotable <- function(txt, rdate, cusips) {
 
         # get table
         table <- txt[start:end]
-    } else {
+    } else if(as.numeric(rdate) >= start.rdate) {
         # start table after </SEC-HEADER>
         txt.post <- txt[max(which(grepl('</SEC-HEADER>', txt))):length(txt)]
 
@@ -273,7 +278,7 @@ detect.infotable <- function(txt, rdate, cusips) {
 }
 
 # function to extract info from one 13f
-extract.one.13f <- function(row, input.folder, output.folder, overwrite = FALSE) {
+extract.one.13f <- function(row, input.folder, output.folder,, overwrite = FALSE) {
 
     # get file
     txt <- readLines(paste(input.folder, row$address, sep = '/'))
@@ -449,7 +454,7 @@ parse.xml <- function(table, cusip.universe, crsp.universe) {
     data <- as.data.table(xmlToDataFrame(xmlParse(table), stringsAsFactors = FALSE))
 
     # make cusip8, cusip9 variables
-    data[, `:=`(cusip9 = substr(cusip, 1, 9), cusip8 = substr(cusip, 1, 8))]
+    data[, `:=`(cusip9 = substr(toupper(cusip), 1, 9), cusip8 = substr(toupper(cusip), 1, 8))]
     data <- data[, -'cusip']
 
     # make variable if in sample
@@ -492,7 +497,8 @@ parse.others <- function(table, cusip.universe, crsp.universe) {
 }
 
 # function to parse any given table
-parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.all, output.folder, overwrite = FALSE) {
+parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.all, output.folder, error.file, 
+                            overwrite = FALSE) {
 
     # require XML
     require(XML)
@@ -500,6 +506,7 @@ parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.al
     # get biographical output
     biographical <- extract_output$biographical
     table <- extract_output$table
+    type <- extract_output$tabletype
 
     # subset cusip.universe.all, crsp.universe.all to relevant rdates
     cusip.universe <- cusip.universe.all[[paste0('y', substr(biographical$rdate[1], 1, 4), 'q', 
@@ -507,24 +514,13 @@ parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.al
     crsp.universe <- crsp.universe.all[yearqtr == as.yearqtr(as.Date(as.character(biographical$rdate), 
                                                                      format = '%Y%m%d'))]
 
-    # determine table type
-    type <- determine.type(table)
-
     # if cleaned table does not exist, create it
     if(overwrite | !file.exists(paste(output.folder, gsub('.txt', '.csv', biographical$address), sep = '/'))) {
         
-        if(type == 'xml') {
-            # parse xml table
-            out <- tryCatch.W.E(parse.xml(table, cusip.universe, crsp.universe))
-        } else if(type == 'fwf') {
-            # parse fwf table
-            out <- tryCatch.W.E(parse.others(table, cusip.universe, crsp.universe))
-        } else if(type == 'tab') {
+        # convert tabs and csvs to fwfs
+        if(type == 'tab') {
             # substitute '\t' with four spaces--effectively convert to fwf
             table <- gsub('\t', '    ', table)
-
-            # parse transformed table
-            out <- tryCatch.W.E(parse.others(table, cusip.universe, crsp.universe))
         } else if(type == 'csv') {
             # remove all commas between quotes
             quoted <- regmatches(table, gregexpr('(\")(.*?)(\")', table))
@@ -534,8 +530,14 @@ parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.al
 
             # now, subsitute all commas and '\t' with four spaces
             table <- gsub('\t|,', '    ', table)
+        }
 
-            # parse transformed table
+        # convert to table
+        if(type == 'xml') {
+            # parse xml table
+            out <- tryCatch.W.E(parse.xml(table, cusip.universe, crsp.universe))
+        } else if(type %in% c('fwf', 'tab', 'csv')) {
+            # parse fwf table
             out <- tryCatch.W.E(parse.others(table, cusip.universe, crsp.universe))
         }
 
@@ -554,9 +556,10 @@ parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.al
             # if file exists, do not use colnames
             write.table(data.table(cik = biographical$cik[1], accession = biographical$accession[1], 
                                    warning = warning, error = error), 
-                        file = paste(output.folder, biographical$cik_row[1], 'errors.csv', sep = '/'), 
-                        append = TRUE, sep = ',', row.names = FALSE, 
-                        col.names = !file.exists(paste(output.folder, biographical$cik_row[1], 'errors.csv', sep = '/')))
+                        file = error.file, 
+                        sep = ',', row.names = FALSE, 
+                        append = file.exists(error.file), 
+                        col.names = !file.exists(error.file))
         }
 
         # return table
@@ -565,4 +568,3 @@ parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.al
 }
 
 ##########
-
