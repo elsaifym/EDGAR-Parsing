@@ -2,7 +2,7 @@
 ### 3_process_one_cik.R                 ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/26/20              ###
-### Date modified: 03/26/20             ###
+### Date modified: 03/27/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -10,7 +10,7 @@
 ### given CIK. This is used along with functions_parallel.R to batch the job.                           ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/EDGAR Parsing/Code/3. process_one_cik.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/edgar_parsing/code/3_process_one_cik.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -26,38 +26,47 @@ set.seed(05041995)
 library(data.table)
 library(zoo)
 library(XML)
+library(parallel)
 
 # source functions
-source('/hpc/group/fuqua/mie4/EDGAR Parsing/Code/Functions/functions_parallel.R')
+source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_general.R')
+source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_download.R')
+source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_extract.R')
+source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_parse.R')
+source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_wrappers.R')
 
 # set directory
-setwd('/hpc/group/fuqua/mie4/EDGAR Parsing/Data')
+setwd('/hpc/group/fuqua/mie4/edgar_parsing/data')
 
 # load crsp
 crspq <- fread('crspq.csv')
 crspq[, yearqtr := as.yearqtr(yearqtr)]
 
 # load cusip universe
-load('CUSIP Universe/cusip6_universe.Rdata')
+load('cusip_universe/cusip6_universe.Rdata')
 
 # get slurm value
 ind <- as.integer(Sys.getenv('SLURM_ARRAY_TASK_ID'))
 
 # get master folder, list all files
-master_folder <- 'Master Files/All_13F'
+master_folder <- 'master_files/all_13f'
 master_files <- list.files(master_folder)
 
 # set locations to save the raw filings, the raw tables, the processed tables, and the biographical folder
-raw_filings_folder <- 'Raw Filings'
-raw_tables_folder <- 'Raw Tables'
-processed_tables_folder <- 'Processed Tables'
-biographical_folder <- 'Biographical Tables'
+raw_filings_folder <- 'raw_filings'
+raw_tables_folder <- 'raw_tables'
+processed_tables_folder <- 'processed_tables'
+biographical_folder <- 'biographical'
+error_file <- 'errors.csv'
 
 # create all folders if they do not exist
 if(!dir.exists(raw_filings_folder)) dir.create(raw_filings_folder)
 if(!dir.exists(raw_tables_folder)) dir.create(raw_tables_folder)
 if(!dir.exists(processed_tables_folder)) dir.create(processed_tables_folder)
 if(!dir.exists(biographical_folder)) dir.create(biographical_folder)
+
+# set overwrite flag (default to FALSE if value missing)
+overwrite <- FALSE
 
 ##### STEP 1: GET THE ADDRESSES OF ALL FILINGS ASSOCIATED WITH THAT CIK #####
 
@@ -67,18 +76,18 @@ addresses <- get.one.address(master_files[ind], folder = master_folder)
 
 ##### STEP 2: DOWNLOAD ALL THOSE ADDRESSES #####
 
-download.one.cik(addresses, output.folder = raw_filings_folder, overwrite = FALSE)
+download.one.cik(addresses, output.folder = raw_filings_folder, overwrite = overwrite, sleep = 0)
 
 ##########
 
 ##### STEP 3: EXTRACT THE TABLES, GET BIOGRAPHICAL INFORMATION #####
 
 # extract info
-tablist <- lapply(1:nrow(addresses), function(i) extract.one.13f(row = addresses[i, ], input.folder = raw_filings_folder,
-                                                                 output.folder = raw_tables_folder, overwrite = TRUE))
+tablist <- extract.all.13f(addresses, cusips = cusip6_universe, input.folder = raw_filings_folder, 
+                           output.folder = raw_tables_folder, overwrite = overwrite)
 
 # get biographical information
-biographical <- rbindlist(lapply(tablist, function(x) cbind(x$biographical, has_table = length(x$table) > 0)))
+biographical <- rbindlist(lapply(tablist, function(x) x$biographical))
 
 # save biographical for that cik
 fwrite(biographical, paste(biographical_folder, paste0(unique(addresses$cik), '.csv'), sep = '/'))
@@ -87,14 +96,13 @@ fwrite(biographical, paste(biographical_folder, paste0(unique(addresses$cik), '.
 
 ##### STEP 4: PARSE THE TABLES #####
 
-# first, remove all entries in tablist with NULL tables
-tablist <- tablist[unlist(lapply(tablist, function(x) !is.null(x[[2]])))]
-
-# determine the types of all tables, drop all "none" types
-tablist <- tablist[unlist(lapply(lapply(tablist, function(x) x$table), determine.type)) != 'none']
+# remove all NULL and "none" types
+tablist <- tablist[unlist(lapply(tablist, function(x) !is.null(x$table) & x$tabletype != 'none'))]
 
 # get tables and save
-tables <- lapply(tablist, parse.one.table, cusip.universe.all = cusip6_universe, crsp.universe.all = crspq, 
-                 output.folder = processed_tables_folder, overwrite = TRUE)
+if(length(tablist) > 0) {
+    tables <- parse.all.tables(tablist, cusip.universe.all = cusip6_universe, crsp.universe.all = crspq, 
+                               output.folder = processed_tables_folder, error.file = error_file, overwrite = overwrite)
+}
 
 ##########
