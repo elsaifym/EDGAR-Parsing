@@ -2,7 +2,7 @@
 ### functions_extract.R                 ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/28/20             ###
+### Date modified: 03/29/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -177,7 +177,7 @@ extract.one.13f <- function(row, cusips, input.folder, output.folder, overwrite 
     }
 
     # determine table type
-    type <- determine.type(table)
+    biographical$type <- determine.type(table)
 
     # print progress if counter and total supplied
     if(!missing(counter) & !missing(total)) {
@@ -186,7 +186,7 @@ extract.one.13f <- function(row, cusips, input.folder, output.folder, overwrite 
     }
     
     # return biographical and table
-    return(list(biographical = biographical, table = table, tabletype = type))
+    return(list(biographical = biographical, table = table))
 }
 
 ##########

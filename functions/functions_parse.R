@@ -2,7 +2,7 @@
 ### functions_parse.R                   ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/28/20             ###
+### Date modified: 03/30/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -192,16 +192,19 @@ parse.others <- function(table, cusip.universe, crsp.universe) {
 ##### FUNCTION TO PARSE ANY ONE TABLE #####
 
 # function to parse any given table
-parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.all, output.folder, error.file, 
-                            overwrite = FALSE, counter, total, start.time) {
+parse.one.table <- function(row, table.input.folder, biographical.input.folder, cusip.universe.all, 
+                            crsp.universe.all, output.folder, error.file, overwrite = FALSE, counter, total, start.time) {
 
     # require XML
     require(XML)
 
-    # get biographical output
-    biographical <- extract_output$biographical
-    table <- extract_output$table
-    type <- extract_output$tabletype
+    # load biographical data, raw table
+    biographical <- fread(paste(biographical.input.folder, paste0(row$cik, '.csv'), sep = '/'), header = TRUE, sep = ',')
+    biographical <- biographical[address == row$address, ]
+    table <- readLines(paste(table.input.folder, row$address, sep = '/'))
+
+    # get type
+    type <- determine.type(table)
 
     # subset cusip.universe.all, crsp.universe.all to relevant rdates
     cusip.universe <- cusip.universe.all[[paste0('y', substr(biographical$rdate[1], 1, 4), 'q', 
@@ -210,8 +213,13 @@ parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.al
                                                                      format = '%Y%m%d'))]
 
     # if cleaned table does not exist, create it
-    if(overwrite | !file.exists(paste(output.folder, gsub('.txt', '.csv', biographical$address[1]), sep = '/'))) {
-        
+    if(overwrite | !file.exists(paste(output.folder, gsub('.txt', '.csv', row$address), sep = '/'))) {
+
+        # if type is none, skip
+        if(type == 'none') {
+            return()
+        }
+
         # convert tabs and csvs to fwfs
         if(type == 'tab') {
             # substitute '\t' with four spaces--effectively convert to fwf
@@ -235,6 +243,14 @@ parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.al
             # parse fwf table
             out <- tryCatch.W.E(parse.others(table, cusip.universe, crsp.universe))
         }
+
+        # add relevant columns--address, rdate, fdate, cik_row, form, type
+        out$value$address <- biographical$address[1]
+        out$value$rdate <- biographical$rdate[1]
+        out$value$fdate <- biographical$fdate[1]
+        out$value$cik <- biographical$cik_row[1]
+        out$value$form <- biographical$form[1]
+        out$value$type <- biographical$type[1]
 
         # save table (create directory if it does not exist)
         if(!dir.exists(paste(output.folder, biographical$cik_row[1], sep = '/'))) {
@@ -264,7 +280,7 @@ parse.one.table <- function(extract_output, cusip.universe.all, crsp.universe.al
         }
 
         # return table
-        return(out$value)
+        return(out$value)    
     }
 }
 

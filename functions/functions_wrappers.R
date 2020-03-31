@@ -2,7 +2,7 @@
 ### functions_wrappers.R                ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/28/20             ###
+### Date modified: 03/30/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -129,8 +129,8 @@ extract.all.13f <- function(addresses, cusips, input.folder, output.folder, over
 
 ##### WRAPPER TO PARSE 13F TABLES #####
 
-parse.all.tables <- function(tablist, cusip.universe.all, crsp.universe.all, output.folder, error.file, overwrite, 
-                             num.cores = detectCores(), ...) {
+parse.all.tables <- function(addresses, table.input.folder, biographical.input.folder, cusip.universe.all, crsp.universe.all, 
+                             output.folder, error.file, overwrite, num.cores = detectCores(), ...) {
 
     # require XML package
     require(XML)
@@ -140,8 +140,9 @@ parse.all.tables <- function(tablist, cusip.universe.all, crsp.universe.all, out
 
     # lapply over addresses
     if(num.cores == 1) {
-        tables <- lapply(1:length(tablist), 
-                         function(i) parse.one.table(extract_output = tablist[[i]], 
+        tables <- lapply(1:nrow(addresses), 
+                         function(i) parse.one.table(row = addresses[i, ], table.input.folder = table.input.folder, 
+                                                     biographical.input.folder = biographical.input.folder, 
                                                      cusip.universe.all = cusip.universe.all, 
                                                      crsp.universe.all = crsp.universe.all, output.folder = output.folder, 
                                                      error.file = error.file, overwrite = overwrite, 
@@ -150,8 +151,9 @@ parse.all.tables <- function(tablist, cusip.universe.all, crsp.universe.all, out
         # require parallelization
         require(parallel)
 
-        tables <- mclapply(1:length(tablist), 
-                           function(i) parse.one.table(extract_output = tablist[[i]], 
+        tables <- mclapply(1:nrow(addresses), 
+                           function(i) parse.one.table(row = addresses[i, ], table.input.folder = table.input.folder, 
+                                                       biographical.input.folder = biographical.input.folder, 
                                                        cusip.universe.all = cusip.universe.all, 
                                                        crsp.universe.all = crsp.universe.all, output.folder = output.folder, 
                                                        error.file = error.file, overwrite = overwrite, 
@@ -161,6 +163,52 @@ parse.all.tables <- function(tablist, cusip.universe.all, crsp.universe.all, out
 
     # return tables
     return(tables)
+}
+
+##########
+
+##### WRAPPER TO OPEN MANY FILES AT ONCE #####
+
+# simple function to load one file (with progress)
+load.one.file <- function(file, counter, total, start.time, ...) {
+    # require data.table package
+    require(data.table)
+
+    # load file
+    out <- fread(file, ...)
+
+    # print progress if counter and total supplied
+    if(!missing(counter) & !missing(total)) {
+        if(missing(start.time)) progress(counter, total, message = 'Loaded files')
+        if(!missing(start.time)) progress(counter, total, start.time, message = 'Loaded files')
+    }
+
+    # return out
+    return(out)
+}
+
+# function to load all files
+load.all.files <- function(file.list, num.cores = detectCores(), ...) {
+    # require data.table package
+    require(data.table)
+
+    # get start.time
+    start.time <- Sys.time()
+
+    # lapply over file.list
+    if(num.cores == 1) {
+        out <- lapply(1:length(file.list), 
+                      function(i) tryCatch.W.E(load.one.file(file.list[i], counter = i, total = length(file.list), 
+                                                start.time = start.time, ...)))
+    } else {
+        # require parallelization
+        require(parallel)
+
+        out <- mclapply(1:length(file.list), 
+                        function(i) tryCatch.W.E(load.one.file(file.list[i], counter = i, total = length(file.list), 
+                                                  start.time = start.time, ...)), 
+                        mc.cores = num.cores)
+    }
 }
 
 ##########
