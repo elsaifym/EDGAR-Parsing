@@ -265,7 +265,7 @@ parse.one.table <- function(row, table.input.folder, biographical.input.folder, 
             error <- ifelse(length(as.character(out$error)) == 0, '', as.character(out$error))
 
             # if file exists, do not use colnames
-            write.table(data.table(cik = biographical$cik[1], accession = biographical$accession[1], 
+            write.table(data.table(cik = biographical$cik_row[1], accession = biographical$accession[1], 
                                    warning = warning, error = error), 
                         file = error.file, 
                         sep = ',', row.names = FALSE, 

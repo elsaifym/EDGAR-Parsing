@@ -65,8 +65,8 @@ if(!dir.exists(biographical_folder)) dir.create(biographical_folder)
 
 # set overwrite flag (default to FALSE if value missing)
 overwrite_download <- FALSE
-overwrite_extract <- TRUE
-overwrite_parse <- TRUE
+overwrite_extract <- FALSE
+overwrite_parse <- FALSE
 
 ##### STEP 1: GET THE ADDRESSES OF ALL FILINGS ASSOCIATED WITH ALL CIK #####
 
@@ -98,9 +98,6 @@ fwrite(biographical, paste(biographical_folder, 'biographical_full.csv', sep = '
 ##########
 
 ##### STEP 4: PARSE THE TABLES #####
-
-# remove the error file if overwrite_parse = TRUE
-if(overwrite_parse) file.remove(error.file)
 
 # parse the raw tables
 tables <- parse.all.tables(addresses_combined, table.input.folder = raw_tables_folder, 

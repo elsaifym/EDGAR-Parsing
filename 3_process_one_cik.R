@@ -99,11 +99,8 @@ fwrite(biographical, paste(biographical_folder, paste0(unique(addresses$cik), '.
 
 ##### STEP 4: PARSE THE TABLES #####
 
-# remove the error file if overwrite_parse = TRUE
-if(overwrite_parse) file.remove(error.file)
-
 # parse the raw tables
-tables <- parse.all.tables(addresses_combined, table.input.folder = raw_tables_folder, 
+tables <- parse.all.tables(addresses, table.input.folder = raw_tables_folder, 
                            biographical.input.folder = biographical_folder, cusip.universe.all = cusip6_universe, 
                            crsp.universe.all = crspq, output.folder = processed_tables_folder, error.file = error_file, 
                            overwrite = overwrite_parse)
