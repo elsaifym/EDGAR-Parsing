@@ -2,7 +2,7 @@
 ### 3_process_one_cik.R                 ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/26/20              ###
-### Date modified: 03/27/20             ###
+### Date modified: 03/30/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -64,7 +64,9 @@ if(!dir.exists(processed_tables_folder)) dir.create(processed_tables_folder)
 if(!dir.exists(biographical_folder)) dir.create(biographical_folder)
 
 # set overwrite flag (default to FALSE if value missing)
-overwrite <- FALSE
+overwrite_download <- FALSE
+overwrite_extract <- TRUE
+overwrite_parse <- TRUE
 
 ##### STEP 1: GET THE ADDRESSES OF ALL FILINGS ASSOCIATED WITH ALL CIK #####
 
@@ -74,7 +76,7 @@ addresses <- get.all.addresses(folder = master_folder)
 
 ##### STEP 2: DOWNLOAD ALL THOSE ADDRESSES #####
 
-download.all.cik(addresses, output.folder = raw_filings_folder, overwrite = overwrite, sleep = 0)
+download.all.cik(addresses, output.folder = raw_filings_folder, overwrite = overwrite_download, sleep = 0)
 
 ##########
 
@@ -85,7 +87,7 @@ addresses_combined <- rbindlist(addresses)
 
 # extract info
 tablist <- extract.all.13f(addresses_combined, cusips = cusip6_universe, input.folder = raw_filings_folder, 
-                           output.folder = raw_tables_folder, overwrite = overwrite)
+                           output.folder = raw_tables_folder, overwrite = overwrite_extract)
 
 # get biographical information
 biographical <- rbindlist(lapply(tablist, function(x) x$biographical))
@@ -97,13 +99,13 @@ fwrite(biographical, paste(biographical_folder, 'biographical_full.csv', sep = '
 
 ##### STEP 4: PARSE THE TABLES #####
 
-# remove all NULL and "none" types
-tablist <- tablist[unlist(lapply(tablist, function(x) !is.null(x$table) & x$tabletype != 'none'))]
+# remove the error file if overwrite_parse = TRUE
+if(overwrite_parse) file.remove(error.file)
 
-# get tables and save
-if(length(tablist) > 0) {
-    tables <- parse.all.tables(tablist, cusip.universe.all = cusip6_universe, crsp.universe.all = crspq, 
-                               output.folder = processed_tables_folder, error.file = error_file, overwrite = overwrite)
-}
+# parse the raw tables
+tables <- parse.all.tables(addresses_combined, table.input.folder = raw_tables_folder, 
+                           biographical.input.folder = biographical_folder, cusip.universe.all = cusip6_universe, 
+                           crsp.universe.all = crspq, output.folder = processed_tables_folder, error.file = error_file, 
+                           overwrite = overwrite_parse)
 
 ##########
