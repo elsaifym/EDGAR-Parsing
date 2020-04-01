@@ -11,7 +11,7 @@
 ### The pdfs are located at https://www.sec.gov/divisions/investment/13flists.htm.                      ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/get_cusip_universe.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/get_cusip_universe.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -31,10 +31,10 @@ library(tesseract)
 library(parallel)
 
 # source functions
-source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_cusip_universe.R')
+source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_cusip_universe.R')
 
 # set directory
-setwd('/hpc/group/fuqua/mie4/edgar_parsing/data')
+setwd('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/data')
 
 # load crsp
 crspq <- fread('crspq.csv')

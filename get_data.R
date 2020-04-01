@@ -9,7 +9,7 @@
 ### This file gathers quarterly CRSP data used to validate observations in 13F filings.                 ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/get_data.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/get_data.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -27,7 +27,7 @@ library(zoo)
 library(RPostgres)
 
 # set directory
-setwd('/hpc/group/fuqua/mie4/edgar_parsing/data')
+setwd('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/data')
 
 # establish wrds connection
 establish.connection <- function(user, password, host = 'wrds-pgdata.wharton.upenn.edu', port = 9737, 

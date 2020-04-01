@@ -2,14 +2,14 @@
 ### functions_download.R                ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/28/20             ###
+### Date modified: 03/31/20             ###
 ###########################################
 
 ###########################################################################################################
 ### This file contains an R function to download 13F filings from EDGAR for a single CIK.               ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_download.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_download.R', echo = TRUE)
 
 ##### FUNCTION TO DOWNLOAD 13F FILINGS #####
 

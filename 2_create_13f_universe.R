@@ -2,7 +2,7 @@
 ### 2_get_13f_universe.R                ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/27/20              ###
-### Date modified: 03/27/20             ###
+### Date modified: 03/31/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -13,7 +13,7 @@
 ### of 13F-HR and 13F-HR/A are included in the subdirectory 'only_13f_hr'.                              ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/2_get_13f_universe.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/2_get_13f_universe.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -30,7 +30,7 @@ library(data.table)
 library(zoo)
 
 # set directory
-setwd('/hpc/group/fuqua/mie4/edgar_parsing/data/master_files')
+setwd('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/data/master_files')
 
 # set output folders
 all_13f_folder <- 'all_13f'

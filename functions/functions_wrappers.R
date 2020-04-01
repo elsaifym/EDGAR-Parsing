@@ -2,7 +2,7 @@
 ### functions_wrappers.R                ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/30/20             ###
+### Date modified: 03/31/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -12,7 +12,7 @@
 ### R is recommended.                                                                                   ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_wrappers.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_wrappers.R', echo = TRUE)
 
 ##### GENERIC WRAPPER TO SPLIT JOBS INTO SETS OF n EACH TO AVOID OVERLOADING MEMORY #####
 

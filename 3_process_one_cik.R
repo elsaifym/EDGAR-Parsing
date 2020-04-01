@@ -11,7 +11,7 @@
 ### submit_job.sh for batch job).                                                                       ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/3_process_one_cik.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/3_process_one_cik.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -30,14 +30,14 @@ library(XML)
 library(parallel)
 
 # source functions
-source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_general.R')
-source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_download.R')
-source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_extract.R')
-source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_parse.R')
-source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_wrappers.R')
+source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_general.R')
+source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_download.R')
+source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_extract.R')
+source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_parse.R')
+source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_wrappers.R')
 
 # set directory
-setwd('/hpc/group/fuqua/mie4/edgar_parsing/data')
+setwd('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/data')
 
 # load crsp
 crspq <- fread('crspq.csv')

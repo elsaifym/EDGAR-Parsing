@@ -2,7 +2,7 @@
 ### functions_cusip_universe.R          ###
 ### Author: Morad Elsaify               ###
 ### Date created: 02/29/20              ###
-### Date modified: 03/21/20             ###
+### Date modified: 03/31/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -10,7 +10,7 @@
 ### quarter. The functions are used by get_cusip_universe.R.                                            ###
 ###########################################################################################################
 
-# source('~/Dropbox/Mory/Duke/Research/Data Projects/EDGAR Parsing/Code/functions_cusip_universe.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions_cusip_universe.R', echo = TRUE)
 
 ##### FUNCTION TO ENSURE ACCURACY (I.E., MAKE SURE CHECKSUM IS CORRECT) #####
 

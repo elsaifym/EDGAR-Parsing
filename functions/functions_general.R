@@ -2,7 +2,7 @@
 ### functions_general.R                 ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/28/20             ###
+### Date modified: 03/31/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -12,7 +12,7 @@
 ### files.                                                                                              ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_general.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_general.R', echo = TRUE)
 
 ##### FUNCTIONS TO HANDLE ERRORS #####
 

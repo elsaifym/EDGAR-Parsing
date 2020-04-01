@@ -2,7 +2,7 @@
 ### 4_combine_tables.R                  ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/30/20             ###
+### Date modified: 04/01/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -12,7 +12,7 @@
 ### report are aggregated.                                                                              ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/4_combine_tables.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/4_combine_tables.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -30,11 +30,11 @@ library(zoo)
 library(parallel)
 
 # source general functions
-source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_general.R')
-source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_wrappers.R')
+source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_general.R')
+source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_wrappers.R')
 
 # set directory
-setwd('/hpc/group/fuqua/mie4/edgar_parsing/data')
+setwd('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/data')
 
 # get all tables
 table_folder <- 'processed_tables'
@@ -106,32 +106,6 @@ holdings <- holdings[, list(shares = sum(na.omit(shares)), value = sum(na.omit(v
 # re-compute deviation
 holdings[, deviation := value / (prc * shares)]
 
-# compute percent within 10% of deviation per report
-holdings[, report_quality := max(sum(deviation >= 0.0009 & deviation <= 0.0011, na.rm = TRUE), 
-                                 sum(deviation >= 0.9 & deviation <= 1.1, na.rm = TRUE), 
-                                 sum(deviation >= 0.0000009 & deviation <= 0.0000011, na.rm = TRUE)) / sum(!is.na(prc)), 
-         by = list(cik, address)]
-
-# get quality as a standalone
-quality <- unique(holdings[, c('cik', 'address', 'type', 'report_quality')])
-
-# only keep reports above threshold first percentile of XML filings (48.56%)
-quality_threshold <- quantile(quality[type == 'xml', ]$report_quality, 0.01, na.rm = TRUE)
-holdings <- holdings[report_quality >= quality_threshold, ]
-
-# only keep observations with rdates on months 3, 6, 9, 12
-holdings <- holdings[substr(rdate, 5, 6) %in% c('03', '06', '09', '12'), ]
-
-# make a within 10 percent variable
-holdings[, within_10 := (deviation >= 0.0009 & deviation <= 0.0011) | 
-                        (deviation >= 0.9 & deviation <= 1.1) | 
-                        (deviation >= 0.0000009 & deviation <= 0.0000011)]
-
-# compute percent ownership, only keep observations with ownership below the 99.95 percentile of XML filings (38.2%)
-holdings[, ownership := shares / (shrout*1000)]
-ownership_threshold <- quantile(holdings[type == 'xml', ]$ownership, 0.9995, na.rm = TRUE)
-holdings <- holdings[ownership <= ownership_threshold, ]
-
 # get adjusted deviation for different reporting units
 adjust.col <- function(col, deviation, convert = 0) {
     # compute sum of deviations in all sets
@@ -156,6 +130,28 @@ adjust.col <- function(col, deviation, convert = 0) {
     return(out)
 }
 holdings[, deviation_adjusted := adjust.col(deviation, deviation), by = list(cik, address)]
+
+# compute percent within 10% of deviation per report
+holdings[, report_quality := sum(deviation_adjusted >= 0.9 & deviation_adjusted <= 1.1, na.rm = TRUE) / sum(!is.na(prc)), 
+         by = list(cik, address)]
+
+# get quality as a standalone
+quality <- unique(holdings[, c('cik', 'address', 'type', 'report_quality')])
+
+# only keep reports above threshold first percentile of XML filings (48.56%)
+quality_threshold <- quantile(quality[type == 'xml', ]$report_quality, 0.01, na.rm = TRUE)
+holdings <- holdings[report_quality >= quality_threshold, ]
+
+# only keep observations with rdates on months 3, 6, 9, 12
+holdings <- holdings[substr(rdate, 5, 6) %in% c('03', '06', '09', '12'), ]
+
+# make a within 10 percent variable
+holdings[, within_10 := deviation >= 0.9 & deviation <= 1.1]
+
+# compute percent ownership, only keep observations with ownership below the 99.95 percentile of XML filings (38.2%)
+holdings[, ownership := shares / (shrout*1000)]
+ownership_threshold <- quantile(holdings[type == 'xml', ]$ownership, 0.9995, na.rm = TRUE)
+holdings <- holdings[ownership <= ownership_threshold, ]
 
 # keep all observations with a maximum error below the 99 percentile of XML filings (85%)
 deviation_threshold <- quantile(abs(holdings[type == 'xml', ]$deviation_adjusted - 1), 0.99, na.rm = T)

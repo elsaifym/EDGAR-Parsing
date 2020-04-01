@@ -9,7 +9,7 @@
 #  NOTE: MUST CHANGE THE ARRAY SIZE TO BE EQUAL TO THE NUMBER OF FILES IN THE DIRECTORY
 
 # change directory, create slurm and rout directories
-cd '/hpc/group/fuqua/mie4/edgar_parsing'
+cd '/hpc/group/fuqua/mie4/data_projects/edgar_parsing'
 mkdir 'slurm'
 mkdri 'rout'
 

@@ -10,7 +10,7 @@
 ### reporting institutions and list details of filing CIK, name, form type, and address.                ###
 ###########################################################################################################
 
-# source('/hps/group/fuqua/mie4/edgar_parsing/code/1_get_master_files.R', echo = TRUE)
+# source('/hps/group/fuqua/mie4/data_projects/edgar_parsing/code/1_get_master_files.R', echo = TRUE)
 
 # clear
 rm(list = ls())
@@ -27,7 +27,7 @@ library(data.table)
 library(zoo)
 
 # set directory
-setwd('/hpc/group/fuqua/mie4/edgar_parsing/data')
+setwd('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/data')
 
 # set output folder
 output_folder <- 'master_files'
