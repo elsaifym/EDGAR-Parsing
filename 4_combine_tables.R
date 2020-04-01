@@ -77,19 +77,13 @@ holdings_raw[, `:=`(value = as.numeric(value), shares = as.numeric(shares), prc 
 # save holdings_raw
 fwrite(holdings_raw, 'final_tables/holdings_raw.csv')
 
-# remove holdings_raw to save memory
-rm(holdings_raw)
-
 ##########
 
 ##### MAKE A CLEAN TABLE OF 13F DATA #####
 
-# remove cols
-remove <- c(remove_raw, c('investmentDiscretion', 'nameOfIssuer', 'titleOfClass', 'votingAuthority'))
-tables <- lapply(tables, remove.cols, cols.to.remove = remove)
-
-# rbind together
-holdings <- rbindlist(tables, fill = TRUE)
+# remove cols, remove holdings_raw to save memory
+holdings <- holdings_raw[, -c('investmentDiscretion', 'nameOfIssuer', 'titleOfClass', 'votingAuthority')]
+rm(holdings_raw)
 
 # convert variables to numeric
 holdings[, `:=`(value = as.numeric(value), shares = as.numeric(shares), prc = as.numeric(prc), 
@@ -138,7 +132,7 @@ holdings[, report_quality := sum(deviation_adjusted >= 0.9 & deviation_adjusted 
 # get quality as a standalone
 quality <- unique(holdings[, c('cik', 'address', 'type', 'report_quality')])
 
-# only keep reports above threshold first percentile of XML filings (48.56%)
+# only keep reports above threshold first percentile of XML filings (50%)
 quality_threshold <- quantile(quality[type == 'xml', ]$report_quality, 0.01, na.rm = TRUE)
 holdings <- holdings[report_quality >= quality_threshold, ]
 
@@ -146,16 +140,16 @@ holdings <- holdings[report_quality >= quality_threshold, ]
 holdings <- holdings[substr(rdate, 5, 6) %in% c('03', '06', '09', '12'), ]
 
 # make a within 10 percent variable
-holdings[, within_10 := deviation >= 0.9 & deviation <= 1.1]
+holdings[, within_10 := deviation_adjusted >= 0.9 & deviation_adjusted <= 1.1]
 
-# compute percent ownership, only keep observations with ownership below the 99.95 percentile of XML filings (38.2%)
+# compute percent ownership, only keep observations with ownership below the 99.95 percentile of XML filings (39.1%)
 holdings[, ownership := shares / (shrout*1000)]
 ownership_threshold <- quantile(holdings[type == 'xml', ]$ownership, 0.9995, na.rm = TRUE)
 holdings <- holdings[ownership <= ownership_threshold, ]
 
-# keep all observations with a maximum error below the 99 percentile of XML filings (85%)
+# keep all observations with a maximum error below the 99 percentile of XML filings (85.7%)
 deviation_threshold <- quantile(abs(holdings[type == 'xml', ]$deviation_adjusted - 1), 0.99, na.rm = T)
-holdings <- holdings[deviation_adjusted - 1 <= deviation_threshold, ]
+holdings <- holdings[abs(deviation_adjusted - 1) <= deviation_threshold, ]
 
 # keep all observations with the maximum value of within_10 by cik, rdate, permno
 holdings <- holdings[holdings[, .I[within_10 == max(within_10)], by = list(cik, rdate, permno)]$V1]
@@ -191,8 +185,7 @@ biographical <- rbindlist(bios)
 quality$has_table <- TRUE
 
 # merge in quality information
-biographical <- merge(biographical, quality[, -c('type')], by.x = c('cik_row', 'address'), 
-                      by.y = c('cik', 'address'), all.x = TRUE)
+biographical <- merge(biographical, quality, by.x = c('cik_row', 'address'), by.y = c('cik', 'address'), all.x = TRUE)
 biographical[is.na(has_table), has_table := FALSE]
 
 # occassionally, a given filing (address, cik) has multiple filing dates/ciks, etc. take the one that matches
