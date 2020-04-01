@@ -2,7 +2,7 @@
 ### functions_parse.R                   ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/30/20             ###
+### Date modified: 04/01/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -13,7 +13,37 @@
 ### the vast majority of these filings, although some filings cannot be easily parsed.                  ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_parse.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_parse.R', echo = TRUE)
+
+##### FUNCTION TO DETERMINE TABLE TYPE #####
+
+# function to determine table type
+determine.type <- function(table, numseps = 3, minspace = 3, min.frac = 0.5) {
+    # easy to identify XMLs and no table
+    if(length(table) == 0) {
+        type <- 'none'
+    } else if(any(grepl('<informationTable|:informationTable', table))) {
+        type <- 'xml'
+    } else {
+        # get the number of tab, comma, and (multiple) space separators (approximation)
+        tabseps <- sum(unlist(lapply(strsplit(table, '\t'), function(x) length(x) - 1)) >= numseps) / length(table)
+        comseps <- sum(unlist(lapply(strsplit(table, '\\,'), function(x) length(x) - 1)) >= numseps) / length(table)
+        spaceseps <- sum(unlist(lapply(gregexpr('[[:alnum:]]\\s+', table), 
+                                       function(x) max(attr(x, 'match.length')))) >= minspace) / length(table)
+
+        # if comseps > min.frac, set to csv; if spaceseps > min.frac, set to fwf; if tabseps > min.frac, set to tab;
+        # csv ends up being a catchall for weird tables--that is ok
+        type <- 'fwf'
+        if(comseps >= min.frac & !is.na(comseps)) type <- 'csv'
+        if(spaceseps >= min.frac & !is.na(spaceseps)) type <- 'fwf'
+        if(tabseps >= min.frac & !is.na(tabseps)) type <- 'tab'
+    }
+
+    # return type
+    return(type)
+}
+
+##########
 
 ##### FUNCTIONS TO SEPARATE ROWS INTO COLUMNS SEPARATE DATA FIELDS #####
 
@@ -250,13 +280,13 @@ parse.one.table <- function(row, table.input.folder, biographical.input.folder, 
         out$value$fdate <- biographical$fdate[1]
         out$value$cik <- biographical$cik_row[1]
         out$value$form <- biographical$form[1]
-        out$value$type <- biographical$type[1]
+        out$value$type <- type
 
         # save table (create directory if it does not exist)
-        if(!dir.exists(paste(output.folder, biographical$cik_row[1], sep = '/'))) {
-            dir.create(paste(output.folder, biographical$cik_row[1], sep = '/'))
+        if(!dir.exists(paste(output.folder, row$cik[1], sep = '/'))) {
+            dir.create(paste(output.folder, row$cik[1], sep = '/'))
         }
-        fwrite(out$value, paste(output.folder, gsub('.txt', '.csv', biographical$address[1]), sep = '/'))
+        fwrite(out$value, paste(output.folder, gsub('.txt', '.csv', row$address[1]), sep = '/'))
 
         # save warnings/errors
         if(length(as.character(out$warning)) > 0 | length(as.character(out$error)) > 0) {
@@ -265,7 +295,7 @@ parse.one.table <- function(row, table.input.folder, biographical.input.folder, 
             error <- ifelse(length(as.character(out$error)) == 0, '', as.character(out$error))
 
             # if file exists, do not use colnames
-            write.table(data.table(cik = biographical$cik_row[1], accession = biographical$accession[1], 
+            write.table(data.table(cik = row$cik[1], accession = biographical$accession[1], 
                                    warning = warning, error = error), 
                         file = error.file, 
                         sep = ',', row.names = FALSE, 

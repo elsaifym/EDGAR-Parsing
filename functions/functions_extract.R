@@ -2,7 +2,7 @@
 ### functions_extract.R                 ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 03/29/20             ###
+### Date modified: 03/31/20             ###
 ###########################################
 
 ###########################################################################################################
@@ -10,7 +10,7 @@
 ### and the information table for the dowloaded 13F filings.                                            ###
 ###########################################################################################################
 
-# source('/hpc/group/fuqua/mie4/edgar_parsing/code/functions/functions_extract.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_extract.R', echo = TRUE)
 
 ##### FUNCTIONS TO EXTRACT BIOGRAPHICAL INFORMATION #####
 
@@ -84,12 +84,12 @@ get.biographical <- function(txt, row) {
 
 ##########
 
-##### FUNCTIONS TO EXTRACT INFORMATION TABLE AND DETECT ITS TYPE #####
+##### FUNCTIONS TO EXTRACT INFORMATION TABLE #####
 
-# function to extract and detect type of information table
+# function to extract information table
 detect.infotable <- function(txt, rdate, cusips, start.rdate = 19990000) {
 
-    # set table to NULL, type to none
+    # set table to NULL
     table <- NULL
 
     # if rdate is before 1999 output character(0)
@@ -123,32 +123,6 @@ detect.infotable <- function(txt, rdate, cusips, start.rdate = 19990000) {
     return(table) 
 }
 
-# function to determine table type
-determine.type <- function(table, numseps = 3, minspace = 3, min.frac = 0.5) {
-    # easy to identify XMLs and no table
-    if(length(table) == 0) {
-        type <- 'none'
-    } else if(any(grepl('<informationTable|:informationTable', table))) {
-        type <- 'xml'
-    } else {
-        # get the number of tab, comma, and (multiple) space separators (approximation)
-        tabseps <- sum(unlist(lapply(strsplit(table, '\t'), function(x) length(x) - 1)) >= numseps) / length(table)
-        comseps <- sum(unlist(lapply(strsplit(table, '\\,'), function(x) length(x) - 1)) >= numseps) / length(table)
-        spaceseps <- sum(unlist(lapply(gregexpr('[[:alnum:]]\\s+', table), 
-                                       function(x) max(attr(x, 'match.length')))) >= minspace) / length(table)
-
-        # if comseps > min.frac, set to csv; if spaceseps > min.frac, set to fwf; if tabseps > min.frac, set to tab;
-        # csv ends up being a catchall for weird tables--that is ok
-        type <- 'fwf'
-        if(comseps >= min.frac & !is.na(comseps)) type <- 'csv'
-        if(spaceseps >= min.frac & !is.na(spaceseps)) type <- 'fwf'
-        if(tabseps >= min.frac & !is.na(tabseps)) type <- 'tab'
-    }
-
-    # return type
-    return(type)
-}
-
 ##########
 
 ##### FUNCTION TO EXTRACT 13F BIOGRAPHICAL DATA AND INFORMATION TABLE #####
@@ -175,9 +149,6 @@ extract.one.13f <- function(row, cusips, input.folder, output.folder, overwrite 
         if(!dir.exists(folder)) dir.create(folder, recursive = TRUE)
         writeLines(table, paste(output.folder, row$address, sep = '/'))
     }
-
-    # determine table type
-    biographical$type <- determine.type(table)
 
     # print progress if counter and total supplied
     if(!missing(counter) & !missing(total)) {
