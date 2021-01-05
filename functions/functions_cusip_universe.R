@@ -29,7 +29,6 @@ checksum.value <- function(x, pos) {
     return(x)
 }
 
-
 checksum.check <- function(cusip, return.check = TRUE) {
 
     # first, remove any spaces from cusip

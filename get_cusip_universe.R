@@ -50,7 +50,7 @@ crspq$cusip6 <- substr(crspq$ncusip, 1, 6)
 ##### APPLY THIS TO YEARS 2004-2019 #####
 
 # make set of urls
-years <- 2004:2019
+years <- 2004:year(Sys.Date())
 q <- 1:4
 names <- sort(c(outer(paste0('y', years, 'q'), q, FUN = 'paste0')))
 urls <- sort(c(outer(paste0(years, 'q'), paste0(q, '.pdf'), FUN = 'paste0')))
