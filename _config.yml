@@ -1,1 +1,3 @@
 theme: jekyll-theme-cayman
+title: Institutional Holdings (Form 13F) Data
+description: Automated parsing of Form 13F filings directly from EDGAR
