@@ -11,7 +11,7 @@
 # change directory, create slurm and rout directories
 cd '/hpc/group/fuqua/mie4/data_projects/edgar_parsing'
 mkdir 'slurm'
-mkdri 'rout'
+mkdir 'rout'
 
 # load R
 module load R/3.6.0
