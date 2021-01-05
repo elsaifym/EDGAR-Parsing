@@ -10,7 +10,7 @@
 ### reporting institutions and list details of filing CIK, name, form type, and address.                ###
 ###########################################################################################################
 
-# source('/hps/group/fuqua/mie4/data_projects/edgar_parsing/code/1_get_master_files.R', echo = TRUE)
+# source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/1_get_master_files.R', echo = TRUE)
 
 # clear
 rm(list = ls())
