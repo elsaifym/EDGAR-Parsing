@@ -4,7 +4,7 @@ Form 13F data have been used widely in finance among both academic researchers a
 
 These data are usually gathered from third-party vendors, such as Thomson-Reuters and FactSet. I provide open-source access to this data directly from SEC's [EDGAR](https://www.sec.gov/edgar.shtml), which makes these filings publicly available as they are submitted.
 
-This page describes the process of downloading, parsing, and compiling all 13F filings (including amended filings) on EDGAR from 1999 through the end of 2019. The repository with all code used in this process can be found on [GitHub](https://github.com/elsaifym/EDGAR-Parsing). All intermediate and final output is available on [Dropbox]().
+This page describes the process of downloading, parsing, and compiling all 13F filings (including amended filings) on EDGAR from 1999 through the end of 2019. The repository with all code used in this process can be found on [GitHub](https://github.com/elsaifym/EDGAR-Parsing). All intermediate and final output is available on [Dropbox](https://www.dropbox.com/sh/27mxydmiume3t0e/AADyZkVZjwZe5Id9n7FbGTlea?dl=0).
 
 # Methodology
 
@@ -24,7 +24,7 @@ There are six main steps to processing the data:
 
 # Data
 
-The Dropbox folder contains the raw, intermediate, and final outputs, which are described below.
+The [Dropbox](https://www.dropbox.com/sh/27mxydmiume3t0e/AADyZkVZjwZe5Id9n7FbGTlea?dl=0) folder contains the raw, intermediate, and final outputs, which are described below.
 1. crspq.csv: This contains the external price data used to determine columns and validate the parsed tables. This is downloaded in get_data.R (a valid WRDS subscription is required).
 2. cusip_universe: This folder contains the CUSIP universe used to extract rows from the 13F information tables. The extraction relies on 6-digit CUSIPs, and the relevant file is cusip6_universe.Rdata. This is created in get_cusip_universe.R.
 3. master_files: This folder contains all master files since 1999. These files contain a list of all SEC filings, including the filer CIK, form type, and form location in a given quarter. These are downloaded in 1_get_master_files.R.
