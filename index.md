@@ -24,7 +24,7 @@ There are six main steps to processing the data:
 
 # Data
 
-The Dropbox folder contains eight main objects of interest
+The Dropbox folder contains the raw, intermediate, and final outputs, which are described below.
 1. crspq.csv: This contains the external price data used to determine columns and validate the parsed tables. This is downloaded in get_data.R (a valid WRDS subscription is required).
 2. cusip_universe: This folder contains the CUSIP universe used to extract rows from the 13F information tables. The extraction relies on 6-digit CUSIPs, and the relevant file is cusip6_universe.Rdata. This is created in get_cusip_universe.R.
 3. master_files: This folder contains all master files since 1999. These files contain a list of all SEC filings, including the filer CIK, form type, and form location in a given quarter. These are downloaded in 1_get_master_files.R.
