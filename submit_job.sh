@@ -4,7 +4,7 @@
 #SBATCH -e slurm/slurm_%A_%a.err
 #SBATCH -o slurm/slurm_%A_%a.out 
 #SBATCH --mem=10G
-#SBATCH --array=1-13322
+#SBATCH --array=1-14176
 
 #  NOTE: MUST CHANGE THE ARRAY SIZE TO BE EQUAL TO THE NUMBER OF FILES IN THE DIRECTORY
 
