@@ -2,7 +2,7 @@
 ### get_cusip_universe.R                ###
 ### Author: Morad Elsaify               ###
 ### Date created: 02/27/20              ###
-### Date modified: 03/27/20             ###
+### Date modified: 02/24/21             ###
 ###########################################
 
 ###########################################################################################################
@@ -47,7 +47,7 @@ crspq$cusip9 <- checksum.check(crspq$ncusip, return.check = FALSE)
 crspq$cusip9 <- paste0(crspq$ncusip, crspq$cusip9)
 crspq$cusip6 <- substr(crspq$ncusip, 1, 6)
 
-##### APPLY THIS TO YEARS 2004-2019 #####
+##### APPLY THIS TO YEARS 2004-2020 #####
 
 # make set of urls
 years <- 2004:year(Sys.Date())
