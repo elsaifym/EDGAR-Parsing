@@ -2,7 +2,7 @@
 ### 4_combine_tables.R                  ###
 ### Author: Morad Elsaify               ###
 ### Date created: 03/28/20              ###
-### Date modified: 04/01/20             ###
+### Date modified: 02/27/21             ###
 ###########################################
 
 ###########################################################################################################
@@ -40,7 +40,7 @@ setwd('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/data')
 table_folder <- 'processed_tables'
 table_files <- list.files(table_folder, recursive = TRUE)
 table_files <- paste(table_folder, table_files, sep = '/')
-tables_load <- wrapper.split(table_files, 100000, load.all.files, colClasses = 'character', num.cores = detectCores())
+tables_load <- wrapper.split(table_files, 10000, load.all.files, colClasses = 'character', num.cores = detectCores())
 tables <- lapply(tables_load, function(x) x$value)
 
 # get all biographical information (not including full file)
@@ -132,7 +132,7 @@ holdings[, report_quality := sum(deviation_adjusted >= 0.9 & deviation_adjusted 
 # get quality as a standalone
 quality <- unique(holdings[, c('cik', 'address', 'type', 'report_quality')])
 
-# only keep reports above threshold first percentile of XML filings (50%)
+# only keep reports above threshold first percentile of XML filings (48.4%)
 quality_threshold <- quantile(quality[type == 'xml', ]$report_quality, 0.01, na.rm = TRUE)
 holdings <- holdings[report_quality >= quality_threshold, ]
 
@@ -142,12 +142,12 @@ holdings <- holdings[substr(rdate, 5, 6) %in% c('03', '06', '09', '12'), ]
 # make a within 10 percent variable
 holdings[, within_10 := deviation_adjusted >= 0.9 & deviation_adjusted <= 1.1]
 
-# compute percent ownership, only keep observations with ownership below the 99.95 percentile of XML filings (39.1%)
+# compute percent ownership, only keep observations with ownership below the 99.95 percentile of XML filings (38.8%)
 holdings[, ownership := shares / (shrout*1000)]
 ownership_threshold <- quantile(holdings[type == 'xml', ]$ownership, 0.9995, na.rm = TRUE)
 holdings <- holdings[ownership <= ownership_threshold, ]
 
-# keep all observations with a maximum error below the 99 percentile of XML filings (85.7%)
+# keep all observations with a maximum error below the 99 percentile of XML filings (99%)
 deviation_threshold <- quantile(abs(holdings[type == 'xml', ]$deviation_adjusted - 1), 0.99, na.rm = T)
 holdings <- holdings[abs(deviation_adjusted - 1) <= deviation_threshold, ]
 

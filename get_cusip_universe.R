@@ -2,7 +2,7 @@
 ### get_cusip_universe.R                ###
 ### Author: Morad Elsaify               ###
 ### Date created: 02/27/20              ###
-### Date modified: 02/24/21             ###
+### Date modified: 03/01/21             ###
 ###########################################
 
 ###########################################################################################################
@@ -29,6 +29,7 @@ library(zoo)
 library(pdftools)
 library(tesseract)
 library(parallel)
+library(readr)
 
 # source functions
 source('/hpc/group/fuqua/mie4/data_projects/edgar_parsing/code/functions/functions_cusip_universe.R')
@@ -90,9 +91,9 @@ archive <- mclapply(archive, clean.tables.archive, mc.cores = detectCores())
 combined <- c(archive, post)
 
 # now, save combined
-load(archive, file = 'cusip_universe/cusip_universe_raw_pre2004.Rdata')
-load(post, file = 'cusip_universe/cusip_universe_raw_post2004.Rdata')
-load(combined, file = 'cusip_universe/cusip_universe_raw.Rdata')
+save(archive, file = 'cusip_universe/cusip_universe_raw_pre2004.Rdata')
+save(post, file = 'cusip_universe/cusip_universe_raw_post2004.Rdata')
+save(combined, file = 'cusip_universe/cusip_universe_raw.Rdata')
 
 # remove all cusips less than 9 digits
 combined <- lapply(combined, function(x) x[nchar(cusipno) == 9, ])
