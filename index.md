@@ -4,7 +4,7 @@ Form 13F data have been used widely in finance among both academic researchers a
 
 These data are usually gathered from third-party vendors, such as Thomson-Reuters and FactSet. I provide open-source access to this data directly from SEC's [EDGAR](https://www.sec.gov/edgar.shtml), which makes these filings publicly available as they are submitted.
 
-This page describes the process of downloading, parsing, and compiling all 13F filings (including amended filings) on EDGAR from 1999 through the end of 2019. The repository with all code used in this process can be found on [GitHub](https://github.com/elsaifym/EDGAR-Parsing). All intermediate and final output is available on [Dropbox](https://www.dropbox.com/sh/27mxydmiume3t0e/AADyZkVZjwZe5Id9n7FbGTlea?dl=0).
+This page describes the process of downloading, parsing, and compiling all 13F filings (including amended filings) on EDGAR from 1999 through the end of 2020. The repository with all code used in this process can be found on [GitHub](https://github.com/elsaifym/EDGAR-Parsing). All intermediate and final output is available on [Dropbox](https://www.dropbox.com/sh/27mxydmiume3t0e/AADyZkVZjwZe5Id9n7FbGTlea?dl=0).
 
 # Methodology
 
